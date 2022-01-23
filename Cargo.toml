@@ -1,0 +1,15 @@
+[package]
+name = "sly-bot"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = "0.3.19"
+tokio = { version = "1.15.0", features = ["full"] }
+twilight-cache-inmemory = "0.9.0"
+twilight-gateway = "0.9.0"
+twilight-http = "0.9.0"
+twilight-model = "0.9.0"
+twilight-standby = "0.9.0"
