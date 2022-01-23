@@ -4,19 +4,22 @@ use std::{
   fs::{self, File},
   io::Write,
   path::Path,
-  sync::Arc,
+  sync::Arc, env,
 };
 use twilight_http::Client as HttpClient;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
 use crate::data::bindings::*;
+use crate::data::api_resources::*;
 
 pub async fn bind(
   msg: Box<MessageCreate>,
   http: Arc<HttpClient>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
+  let steam_api_key = env::var("SLY_STEAM").expect("steam api key not found");
+
   let args: Vec<&str> = msg.content.split(" ").collect();
-  if args.len() < 1 {
+  if args.len() < 2 {
     http
       .create_message(msg.channel_id)
       .content("Missing argument: Steam ID")?
@@ -26,6 +29,29 @@ pub async fn bind(
   }
   let steam_id = args[1];
   let discord_id = msg.author.id;
+
+  let request_url = format!(
+    "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={key}&steamids={steam_id}",
+    steam_id = steam_id,
+    key = steam_api_key
+  );
+  let response = reqwest::get(&request_url).await.expect("trash");
+  let player_response: PlayerResponse = response.json().await.expect("trash");
+  let players: Players = player_response.response;
+  let account_data: Option<&SteamUserSummary> = players.players.first();
+  match account_data{
+    Some(_) => (),
+    None => {
+      http
+        .create_message(msg.channel_id)
+        .content("Steam account does not exist")?
+        .exec()
+        .await?;
+      return Ok(());
+    },
+  }
+
+  println!("{:?}", account_data.unwrap());
 
   if !Path::new("bindings.json").exists() {
     let mut f = File::create("bindings.json")?;
@@ -52,6 +78,12 @@ pub async fn bind(
   };
   values.steam_bindings.push(new_entry);
   fs::write("bindings.json", serde_json::to_string(&values)?)?;
+
+  http
+    .create_message(msg.channel_id)
+    .content(&format!("Account bound to steam user: {}", account_data.unwrap().personaname))?
+    .exec()
+    .await?;
 
   Ok(())
 }

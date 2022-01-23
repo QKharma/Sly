@@ -64,7 +64,11 @@ async fn handle_event(
   }
   match event {
     Event::MessageCreate(msg) if PREFIX_CHECK.is_match(&msg.content) => {
-      let command = COMMAND.captures(&msg.content).unwrap().get(1).map_or("", |m| m.as_str());
+      let command = COMMAND
+        .captures(&msg.content)
+        .unwrap()
+        .get(1)
+        .map_or("", |m| m.as_str());
       println!("{:?}", command);
       if command == "ping" {
         ping(msg, http).await?;
