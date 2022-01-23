@@ -14,8 +14,9 @@ use regex::Regex;
 mod data;
 
 mod commands;
-use crate::commands::create_binding::*;
+use crate::commands::bind_steam::*;
 use crate::commands::ping::*;
+use crate::commands::unbind_steam::*;
 
 const PREFIX: char = '!';
 
@@ -59,13 +60,18 @@ async fn handle_event(
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
   lazy_static! {
     static ref PREFIX_CHECK: Regex = Regex::new(&format!(r"{}.+", PREFIX)).unwrap();
+    static ref COMMAND: Regex = Regex::new(r"^.(\S*)").unwrap();
   }
   match event {
     Event::MessageCreate(msg) if PREFIX_CHECK.is_match(&msg.content) => {
-      if msg.content.contains("ping") {
+      let command = COMMAND.captures(&msg.content).unwrap().get(1).map_or("", |m| m.as_str());
+      println!("{:?}", command);
+      if command == "ping" {
         ping(msg, http).await?;
-      } else if msg.content.contains("bind") {
-        create_binding(msg, http).await?;
+      } else if command == "bind" {
+        bind(msg, http).await?;
+      } else if command == "unbind" {
+        unbind(msg, http).await?;
       }
     }
     Event::ShardConnected(_) => {
