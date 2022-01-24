@@ -1,4 +1,5 @@
 use serde_json::json;
+use twilight_embed_builder::{EmbedBuilder, ImageSource};
 use std::{
   error::Error,
   fs::{self, File},
@@ -51,7 +52,7 @@ pub async fn bind(
     },
   }
 
-  println!("{:?}", account_data.unwrap());
+  let account_data = account_data.unwrap();
 
   if !Path::new("bindings.json").exists() {
     let mut f = File::create("bindings.json")?;
@@ -79,9 +80,15 @@ pub async fn bind(
   values.steam_bindings.push(new_entry);
   fs::write("bindings.json", serde_json::to_string(&values)?)?;
 
+  let embed = EmbedBuilder::new()
+    .thumbnail(ImageSource::url(&account_data.avatar)?)
+    .title(&format!("Account bound to steam user: {}", account_data.personaname))
+    .color(0x28de98)
+    .build()?;
+  
   http
     .create_message(msg.channel_id)
-    .content(&format!("Account bound to steam user: {}", account_data.unwrap().personaname))?
+    .embeds(&[embed])?
     .exec()
     .await?;
 
