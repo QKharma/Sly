@@ -1,5 +1,4 @@
 use std::{
-  error::Error,
   fs::{self},
   sync::Arc,
 };
@@ -8,10 +7,9 @@ use twilight_model::gateway::payload::incoming::MessageCreate;
 
 use crate::data::bindings::Bindings;
 
-pub async fn unbind(
-  msg: Box<MessageCreate>,
-  http: Arc<HttpClient>,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+use super::command::CommandResult;
+
+pub async fn unbind(msg: Box<MessageCreate>, http: Arc<HttpClient>) -> CommandResult<()> {
   let discord_id = msg.author.id;
   let content = fs::read_to_string("bindings.json")?;
   let mut values: Bindings = serde_json::from_str(&content)?;
