@@ -8,7 +8,7 @@ use twilight_model::gateway::payload::incoming::MessageCreate;
 
 use crate::data::bindings::Bindings;
 
-pub async fn unbind(
+pub async fn unlink(
   msg: Box<MessageCreate>,
   http: Arc<HttpClient>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -30,13 +30,13 @@ pub async fn unbind(
   if removed == true {
     http
       .create_message(msg.channel_id)
-      .content("Binding removed")?
+      .content("Steam account unlinked")?
       .exec()
       .await?;
   } else {
     http
       .create_message(msg.channel_id)
-      .content("No binding found")?
+      .content("No linked steam account found")?
       .exec()
       .await?;
   }

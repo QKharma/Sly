@@ -1,3 +1,3 @@
-pub mod bind_steam;
+pub mod link_steam;
 pub mod ping;
-pub mod unbind_steam;
+pub mod unlink_steam;

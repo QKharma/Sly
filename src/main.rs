@@ -14,9 +14,9 @@ use regex::Regex;
 mod data;
 
 mod commands;
-use crate::commands::bind_steam::*;
+use crate::commands::link_steam::*;
 use crate::commands::ping::*;
-use crate::commands::unbind_steam::*;
+use crate::commands::unlink_steam::*;
 
 const PREFIX: char = '!';
 
@@ -73,9 +73,9 @@ async fn handle_event(
       if command == "ping" {
         ping(msg, http).await?;
       } else if command == "bind" {
-        bind(msg, http).await?;
+        link(msg, http).await?;
       } else if command == "unbind" {
-        unbind(msg, http).await?;
+        unlink(msg, http).await?;
       }
     }
     Event::ShardConnected(_) => {

@@ -1,19 +1,20 @@
 use serde_json::json;
-use twilight_embed_builder::{EmbedBuilder, ImageSource};
 use std::{
+  env,
   error::Error,
   fs::{self, File},
   io::Write,
   path::Path,
-  sync::Arc, env,
+  sync::Arc,
 };
+use twilight_embed_builder::{EmbedBuilder, ImageSource};
 use twilight_http::Client as HttpClient;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
-use crate::data::bindings::*;
 use crate::data::api_resources::*;
+use crate::data::bindings::*;
 
-pub async fn bind(
+pub async fn link(
   msg: Box<MessageCreate>,
   http: Arc<HttpClient>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -40,7 +41,7 @@ pub async fn bind(
   let player_response: PlayerResponse = response.json().await.expect("trash");
   let players: Players = player_response.response;
   let account_data: Option<&SteamUserSummary> = players.players.first();
-  match account_data{
+  match account_data {
     Some(_) => (),
     None => {
       http
@@ -49,7 +50,7 @@ pub async fn bind(
         .exec()
         .await?;
       return Ok(());
-    },
+    }
   }
 
   let account_data = account_data.unwrap();
@@ -67,7 +68,14 @@ pub async fn bind(
     if binding.discord_id == discord_id {
       http
         .create_message(msg.channel_id)
-        .content("Account is already bound")?
+        .content(&format!(
+          "{discord_name} is already linked to a steam account",
+          discord_name = (format!(
+            "{}#{}",
+            &msg.author.name,
+            &msg.author.discriminator.to_string()
+          ))
+        ))?
         .exec()
         .await?;
       return Ok(());
@@ -82,10 +90,18 @@ pub async fn bind(
 
   let embed = EmbedBuilder::new()
     .thumbnail(ImageSource::url(&account_data.avatar)?)
-    .title(&format!("Account bound to steam user: {}", account_data.personaname))
+    .title(&format!(
+      "{discord_name} linked to steam user: {steam_name}",
+      discord_name = (format!(
+        "{}#{}",
+        &msg.author.name,
+        &msg.author.discriminator.to_string()
+      )),
+      steam_name = account_data.personaname
+    ))
     .color(0x28de98)
     .build()?;
-  
+
   http
     .create_message(msg.channel_id)
     .embeds(&[embed])?
