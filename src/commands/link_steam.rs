@@ -11,8 +11,8 @@ use twilight_embed_builder::{EmbedBuilder, ImageSource};
 use twilight_http::Client as HttpClient;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
-use crate::data::api_resources::*;
-use crate::data::bindings::*;
+use crate::schemas::bindings::*;
+use crate::schemas::steam_user::*;
 
 pub async fn link(
   msg: Box<MessageCreate>,
@@ -37,8 +37,8 @@ pub async fn link(
     steam_id = steam_id,
     key = steam_api_key
   );
-  let response = reqwest::get(&request_url).await.expect("trash");
-  let player_response: PlayerResponse = response.json().await.expect("trash");
+  let response = reqwest::get(&request_url).await?;
+  let player_response: PlayerResponse = response.json().await?;
   let players: Players = player_response.response;
   let account_data: Option<&SteamUserSummary> = players.players.first();
   match account_data {

@@ -6,7 +6,7 @@ use std::{
 use twilight_http::Client as HttpClient;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
-use crate::data::bindings::Bindings;
+use crate::schemas::bindings::Bindings;
 
 pub async fn unlink(
   msg: Box<MessageCreate>,

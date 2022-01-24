@@ -11,12 +11,13 @@ use twilight_model::gateway::Intents;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-mod data;
+mod schemas;
 
 mod commands;
-use crate::commands::link_steam::*;
-use crate::commands::ping::*;
-use crate::commands::unlink_steam::*;
+use crate::commands::link_steam::link;
+use crate::commands::ping::ping;
+use crate::commands::random_game::random_game;
+use crate::commands::unlink_steam::unlink;
 
 const PREFIX: char = '!';
 
@@ -76,6 +77,8 @@ async fn handle_event(
         link(msg, http).await?;
       } else if command == "unbind" {
         unlink(msg, http).await?;
+      } else if command == "rg" {
+        random_game(msg, http).await?;
       }
     }
     Event::ShardConnected(_) => {
