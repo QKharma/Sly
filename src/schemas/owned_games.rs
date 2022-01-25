@@ -17,4 +17,5 @@ pub struct OwnedGame {
   pub name: String,
   pub playtime_forever: usize,
   pub img_icon_url: String,
+  pub img_logo_url: String,
 }

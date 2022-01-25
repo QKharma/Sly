@@ -27,7 +27,7 @@ pub async fn unlink(
 
   fs::write("bindings.json", serde_json::to_string(&values)?)?;
 
-  if removed == true {
+  if removed {
     http
       .create_message(msg.channel_id)
       .content("Steam account unlinked")?

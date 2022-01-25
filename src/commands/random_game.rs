@@ -17,8 +17,7 @@ pub async fn random_game(
   let steam_binding = values
     .steam_bindings
     .iter()
-    .filter(|m| m.discord_id == msg.author.id)
-    .next();
+    .find(|m| m.discord_id == msg.author.id);
 
   match steam_binding {
     Some(binding) => {
@@ -39,12 +38,13 @@ pub async fn random_game(
       let random_game = &owned_games[random_index];
 
       let embed = EmbedBuilder::new()
-        .thumbnail(ImageSource::url(&format!(
-          "https://media.steampowered.com/steamcommunity/public/images/apps/{}/{}",
-          random_game.appid, random_game.img_icon_url
+        .title(&format!("You should play: {}", random_game.name))
+        .image(ImageSource::url(&format!(
+          "https://media.steampowered.com/steamcommunity/public/images/apps/{}/{}.jpg",
+          random_game.appid, random_game.img_logo_url
         ))?)
-        .title(&format!("{}", random_game.name))
         .color(0x28de98)
+        .description(&format!("played for {:.1}h",random_game.playtime_forever as f32/60.0))
         .build()?;
 
       http

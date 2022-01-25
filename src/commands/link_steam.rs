@@ -20,7 +20,7 @@ pub async fn link(
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
   let steam_api_key = env::var("SLY_STEAM").expect("steam api key not found");
 
-  let args: Vec<&str> = msg.content.split(" ").collect();
+  let args: Vec<&str> = msg.content.split(' ').collect();
   if args.len() < 2 {
     http
       .create_message(msg.channel_id)
@@ -60,7 +60,7 @@ pub async fn link(
     let empty_bindings = json!({
       "steam_bindings": []
     });
-    f.write(serde_json::to_string(&empty_bindings)?.as_bytes())?;
+    f.write_all(serde_json::to_string(&empty_bindings)?.as_bytes())?;
   }
   let content = fs::read_to_string("bindings.json")?;
   let mut values: Bindings = serde_json::from_str(&content)?;
