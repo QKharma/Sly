@@ -1,7 +1,7 @@
-use super::command::CommandResult;
 use crate::data::api_resources::*;
 use crate::data::bindings::*;
 use serde_json::json;
+use std::error::Error;
 use std::{
   env,
   fs::{self, File},
@@ -16,7 +16,10 @@ use twilight_model::gateway::payload::incoming::MessageCreate;
 pub struct LinkSteam;
 
 impl LinkSteam {
-  pub async fn exec(msg: Box<MessageCreate>, http: Arc<HttpClient>) -> CommandResult<()> {
+  pub async fn exec(
+    msg: Box<MessageCreate>,
+    http: Arc<HttpClient>,
+  ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let steam_api_key = env::var("SLY_STEAM").expect("steam api key not found");
 
     let args: Vec<&str> = msg.content.split(" ").collect();

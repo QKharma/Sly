@@ -1,8 +1,11 @@
 mod bot;
-mod data;
 mod commands;
+mod data;
 use crate::bot::*;
 
 fn main() {
-  Sly::new().expect("could not start bot");
+  match Sly::run() {
+    Ok(_) => (),
+    Err(e) => println!("startup failed: {:?}", e),
+  }
 }

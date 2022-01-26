@@ -3,54 +3,53 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use std::{env, error::Error, sync::Arc};
 use twilight_cache_inmemory::{InMemoryCache, ResourceType};
-use twilight_gateway::{
-  cluster::{Cluster, ShardScheme},
-  Event,
-};
-use twilight_http::Client as HttpClient;
+use twilight_gateway::{cluster::{Cluster, ShardScheme}, Event};
+use twilight_http::Client;
 use twilight_model::gateway::Intents;
 
-use crate::commands::link_steam::*;
-use crate::commands::ping::*;
-use crate::commands::unlink_steam::*;
+use crate::commands::{link_steam::LinkSteam, ping::ping, unlink_steam::unbind};
 
-pub struct Sly{
-  prefix: char
-}
+pub const BOT_PREFIX: char = '!';
+
+pub struct Sly;
 
 impl Sly {
-
   #[tokio::main]
-  pub async fn new(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let token = env::var("SLY").expect("token not found");
-    self.prefix = '!';
-
+  pub async fn run() -> Result<(), Box<dyn Error + Send + Sync>> {
+    let token = env::var("SLY")?;
     let scheme = ShardScheme::Auto;
   
     let (cluster, mut events) = Cluster::builder(token.to_owned(), Intents::GUILD_MESSAGES)
       .shard_scheme(scheme)
       .build()
       .await?;
+
     let cluster = Arc::new(cluster);
-  
-    let cluster_spawn = Arc::clone(&cluster);
-  
+
     tokio::spawn(async move {
-      cluster_spawn.up().await;
+      cluster.up().await;
     });
-  
-    let http = Arc::new(HttpClient::new(token));
-  
-    let cache = InMemoryCache::builder()
-      .resource_types(ResourceType::MESSAGE)
-      .build();
-  
+
+    let http = Arc::new(Client::new(token));
+
+//    let application_id = {
+//      let response = http.current_user_application().exec().await?;
+//      
+//      response.model().await?.id
+//      };
+
+//    let ping = http
+//      .interaction(application_id)
+//      .create_global_command()
+//      .chat_input("ping", "pong")?
+//      .exec();
+//
+//    println!("{:?}", ping.await?);
+
     while let Some((shard_id, event)) = events.next().await {
-      cache.update(&event);
-  
       tokio::spawn(handle_event(shard_id, event, Arc::clone(&http)));
     }
-  
+
     Ok(())
   }
 }
@@ -58,14 +57,14 @@ impl Sly {
 async fn handle_event(
   shard_id: u64,
   event: Event,
-  http: Arc<HttpClient>,
+  http: Arc<Client>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
   lazy_static! {
-    static ref PREFIX_CHECK: Regex = Regex::new(&format!(r"{}.+", PREFIX)).unwrap();
+    static ref BOT_PREFIX_CHECK: Regex = Regex::new(&format!(r"{}.+", BOT_PREFIX)).unwrap();
     static ref COMMAND: Regex = Regex::new(r"^.(\S*)").unwrap();
   }
   match event {
-    Event::MessageCreate(msg) if PREFIX_CHECK.is_match(&msg.content) => {
+    Event::MessageCreate(msg) if BOT_PREFIX_CHECK.is_match(&msg.content) => {
       let command = COMMAND
         .captures(&msg.content)
         .unwrap()
