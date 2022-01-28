@@ -4,7 +4,10 @@ use twilight_embed_builder::{EmbedBuilder, ImageSource};
 use twilight_http::Client as HttpClient;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
-use crate::schemas::{bindings::Bindings, wishlist_data::{WishlistGame, GameSub}};
+use crate::schemas::{
+  bindings::Bindings,
+  wishlist_data::{GameSub, WishlistGame},
+};
 
 pub async fn random_wishlist_game(
   msg: Box<MessageCreate>,
@@ -33,7 +36,10 @@ pub async fn random_wishlist_game(
 
       let random_game = &games[random_index];
 
-      let game_sub = random_game.subs.first().unwrap_or(&GameSub {discount_pct: 0, price: 0});
+      let game_sub = random_game.subs.first().unwrap_or(&GameSub {
+        discount_pct: 0,
+        price: 0,
+      });
 
       let gametags = random_game.tags.clone();
       let gametags_str: Option<String> = gametags
@@ -42,9 +48,9 @@ pub async fn random_wishlist_game(
 
       let mut old_price = String::from("");
       let mut disclaimer = String::from("");
-      
+
       if game_sub.discount_pct > 0 {
-        old_price = format!("~~{}$~~ ",game_sub.price/(100-game_sub.discount_pct));
+        old_price = format!("~~{}$~~ ", game_sub.price / (100 - game_sub.discount_pct));
       }
 
       if random_game.r#type == "DLC" {
@@ -59,7 +65,7 @@ pub async fn random_wishlist_game(
         review_score = random_game.review_score,
         tags = gametags_str.unwrap_or("no tags found".to_string()),
         discount = game_sub.discount_pct,
-        price = game_sub.price/100,
+        price = game_sub.price / 100,
         disclaimer = disclaimer,
         old_price = old_price
       );
