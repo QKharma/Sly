@@ -10,7 +10,7 @@ pub async fn random_game(
   msg: Box<MessageCreate>,
   http: Arc<HttpClient>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
-  let steam_api_key = env::var("SLY_STEAM").expect("steam api key not found");
+  let steam_api_key = env::var("SLY_STEAM")?;
 
   let content = fs::read_to_string("bindings.json")?;
   let values: Bindings = serde_json::from_str(&content)?;
@@ -44,7 +44,10 @@ pub async fn random_game(
           random_game.appid, random_game.img_logo_url
         ))?)
         .color(0x28de98)
-        .description(&format!("played for {:.1}h",random_game.playtime_forever as f32/60.0))
+        .description(&format!(
+          "played for {:.1}h",
+          random_game.playtime_forever as f32 / 60.0
+        ))
         .build()?;
 
       http

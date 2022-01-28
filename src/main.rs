@@ -17,12 +17,19 @@ mod commands;
 use crate::commands::link_steam::link;
 use crate::commands::ping::ping;
 use crate::commands::random_game::random_game;
+use crate::commands::random_wishlist_game::random_wishlist_game;
 use crate::commands::unlink_steam::unlink;
 
 const PREFIX: char = '!';
 
+fn main() {
+  if let Err(e) = run() {
+    println!("{:?}", e);
+  }
+}
+
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn run() -> Result<(), Box<dyn Error + Send + Sync>> {
   let token = env::var("SLY").expect("token not found");
 
   let scheme = ShardScheme::Auto;
@@ -48,7 +55,11 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
   while let Some((shard_id, event)) = events.next().await {
     cache.update(&event);
 
-    tokio::spawn(handle_event(shard_id, event, Arc::clone(&http)));
+    let task = tokio::spawn(handle_event(shard_id, event, Arc::clone(&http)));
+    match task.await? {
+      Err(e) => println!("{}", e),
+      _ => (),
+    };
   }
 
   Ok(())
@@ -79,6 +90,8 @@ async fn handle_event(
         unlink(msg, http).await?;
       } else if command == "rg" {
         random_game(msg, http).await?;
+      } else if command == "rw" {
+        random_wishlist_game(msg, http).await?;
       }
     }
     Event::ShardConnected(_) => {

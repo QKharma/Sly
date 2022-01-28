@@ -18,7 +18,7 @@ pub async fn link(
   msg: Box<MessageCreate>,
   http: Arc<HttpClient>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
-  let steam_api_key = env::var("SLY_STEAM").expect("steam api key not found");
+  let steam_api_key = env::var("SLY_STEAM")?;
 
   let args: Vec<&str> = msg.content.split(' ').collect();
   if args.len() < 2 {
