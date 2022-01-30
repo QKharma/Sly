@@ -84,9 +84,9 @@ async fn handle_event(
       println!("{:?}", command);
       if command == "ping" {
         ping(msg, http).await?;
-      } else if command == "bind" {
+      } else if command == "link" {
         link(msg, http).await?;
-      } else if command == "unbind" {
+      } else if command == "unlink" {
         unlink(msg, http).await?;
       } else if command == "rg" {
         random_game(msg, http).await?;
